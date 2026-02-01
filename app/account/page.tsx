@@ -6,13 +6,98 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+
+type UserMeResponse = {
+  id: string;
+  username: string | null;
+  email: string | null;
+  bio: string | null;
+  avatarUrl: string | null;
+  totalViews: number;
+  createdAt: string;
+  page: {
+    views: number;
+  } | null;
+  links: Array<{
+    id: string;
+    title: string;
+    visible: boolean;
+  }>;
+  connections: Array<{
+    id: string;
+    provider: string;
+  }>;
+};
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [userData, setUserData] = useState<UserMeResponse | null>(null);
+  const [loadingUserData, setLoadingUserData] = useState(false);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadUserData = async () => {
+      try {
+        setLoadingUserData(true);
+        const res = await fetch('/api/user/me');
+        if (!res.ok) {
+          throw new Error('Failed to fetch user data');
+        }
+        const data = (await res.json()) as UserMeResponse;
+        if (isMounted) {
+          setUserData(data);
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error('Unable to load account data');
+      } finally {
+        if (isMounted) {
+          setLoadingUserData(false);
+        }
+      }
+    };
+
+    loadUserData();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const stats = useMemo(() => {
+    const username = userData?.username || (session?.user as any)?.username || 'user';
+    const hasAvatar = Boolean(userData?.avatarUrl || (session?.user as any)?.image);
+    const hasBio = Boolean(userData?.bio && userData.bio.trim().length > 0);
+    const hasDiscord = userData?.connections?.some((c) => c.provider === 'discord') || false;
+    const hasSocials = (userData?.links?.filter((l) => l.visible).length || 0) > 0;
+
+    const completedTasks = [
+      { id: 1, label: 'Upload An Avatar', completed: hasAvatar },
+      { id: 2, label: 'Add A Description', completed: hasBio },
+      { id: 3, label: 'Link Discord Account', completed: hasDiscord },
+      { id: 4, label: 'Add Socials', completed: hasSocials },
+      { id: 5, label: 'Enable 2FA', completed: false },
+    ];
+
+    const completedCount = completedTasks.filter((task) => task.completed).length;
+    const profileCompletion = Math.round((completedCount / completedTasks.length) * 100);
+
+    const totalViews = userData?.totalViews ?? 0;
+
+    return {
+      username,
+      alias: 'Unavailable',
+      uid: userData?.id || '—',
+      profileViews: totalViews,
+      viewsChange: `${totalViews} total views`,
+      profileCompletion,
+      completedTasks,
+    };
+  }, [userData, session?.user]);
 
   if (status === 'loading') {
     return (
@@ -36,23 +121,6 @@ export default function DashboardPage() {
     toast.dismiss(loadingToast);
     toast.success('Logged out successfully');
     router.push('/');
-  };
-
-  // Mock data - sostituisci con i tuoi dati reali
-  const stats = {
-    username: (session.user as any)?.username || 'user',
-    alias: 'Unavailable', // Premium only
-    uid: '1,386,164',
-    profileViews: 6,
-    viewsChange: '+6 views since last 7 days',
-    profileCompletion: 80,
-    completedTasks: [
-      { id: 1, label: 'Upload An Avatar', completed: true },
-      { id: 2, label: 'Add A Description', completed: true },
-      { id: 3, label: 'Link Discord Account', completed: true },
-      { id: 4, label: 'Add Socials', completed: true },
-      { id: 5, label: 'Enable 2FA', completed: false },
-    ],
   };
 
   return (
@@ -155,23 +223,6 @@ export default function DashboardPage() {
               label="Links"
               collapsed={sidebarCollapsed}
               onClick={() => router.push('/links')}
-            />
-
-            <NavItem
-              icon={
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-                  />
-                </svg>
-              }
-              label="Premium"
-              collapsed={sidebarCollapsed}
-              badge="PRO"
-              onClick={() => router.push('/premium')}
             />
 
             <NavItem
@@ -307,6 +358,9 @@ export default function DashboardPage() {
             className="mb-8"
           >
             <h1 className="text-4xl font-black mb-2">Account Overview</h1>
+            {loadingUserData && (
+              <p className="text-sm text-gray-500">Loading account data...</p>
+            )}
           </motion.div>
 
           {/* Stats Cards */}
