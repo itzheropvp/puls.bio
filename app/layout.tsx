@@ -3,7 +3,7 @@ import { Inter } from "next/font/google";
 //@ts-ignore ~~ts nigga should fucking stop throwing random ahh errors.
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
-import { Providers } from "./providers";
+import { Providers } from "../components/providers";
   
 const inter = Inter({
   subsets: ["latin"],

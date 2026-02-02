@@ -19,7 +19,6 @@ export async function GET() {
         email: true,
         bio: true,
         avatarUrl: true,
-        totalViews: true,
         createdAt: true,
         page: {
           select: {

@@ -20,7 +20,7 @@ export class UserModel {
     })
   }
 
-  static async findById(id: string) {
+  static async findById(id: number) {
     return prisma.user.findUnique({
       where: { id },
     })
@@ -42,7 +42,7 @@ export class UserModel {
     })
   }
 
-  static async incrementViews(id: string) {
+  static async incrementViews(id: number) {
     return prisma.user.update({
       where: { id },
       data: {

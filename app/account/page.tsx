@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 type UserMeResponse = {
   id: string;
@@ -15,7 +16,6 @@ type UserMeResponse = {
   email: string | null;
   bio: string | null;
   avatarUrl: string | null;
-  totalViews: number;
   createdAt: string;
   page: {
     views: number;
@@ -37,6 +37,9 @@ export default function DashboardPage() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [userData, setUserData] = useState<UserMeResponse | null>(null);
   const [loadingUserData, setLoadingUserData] = useState(false);
+  const [showUserMenu, setShowUserMenu] = useState(false);
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
   useEffect(() => {
     let isMounted = true;
@@ -68,6 +71,34 @@ export default function DashboardPage() {
     };
   }, []);
 
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadAnalytics = async () => {
+      try {
+        setLoadingAnalytics(true);
+        const res = await fetch('/api/user/analytics');
+        if (res.ok) {
+          const data = await res.json();
+          if (isMounted) {
+            setAnalyticsData(data);
+          }
+        }
+      } catch (error) {
+        console.error('Failed to load analytics:', error);
+      } finally {
+        if (isMounted) {
+          setLoadingAnalytics(false);
+        }
+      }
+    };
+
+    loadAnalytics();
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
   const stats = useMemo(() => {
     const username = userData?.username || (session?.user as any)?.username || 'user';
     const hasAvatar = Boolean(userData?.avatarUrl || (session?.user as any)?.image);
@@ -86,14 +117,14 @@ export default function DashboardPage() {
     const completedCount = completedTasks.filter((task) => task.completed).length;
     const profileCompletion = Math.round((completedCount / completedTasks.length) * 100);
 
-    const totalViews = userData?.totalViews ?? 0;
+    const pageViews = userData?.page?.views ?? 0;
 
     return {
       username,
       alias: 'Unavailable',
       uid: userData?.id || '—',
-      profileViews: totalViews,
-      viewsChange: `${totalViews} total views`,
+      profileViews: pageViews,
+      viewsChange: `${pageViews} total views`,
       profileCompletion,
       completedTasks,
     };
@@ -125,7 +156,6 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white flex">
-      {/* Animated background */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div
           className="absolute top-1/4 -left-1/4 w-[600px] h-[600px] bg-purple-600/10 rounded-full blur-3xl"
@@ -155,7 +185,6 @@ export default function DashboardPage() {
         />
       </div>
 
-      {/* Sidebar */}
       <motion.aside
         initial={{ x: -300 }}
         animate={{ x: 0 }}
@@ -164,7 +193,6 @@ export default function DashboardPage() {
         }`}
       >
         <div className="flex flex-col h-full p-4">
-          {/* Logo */}
           <div className="flex items-center gap-3 mb-8 px-2">
             <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center font-bold text-xl shrink-0">
               P
@@ -174,7 +202,6 @@ export default function DashboardPage() {
             )}
           </div>
 
-          {/* Navigation */}
           <nav className="flex-1 space-y-2">
             <NavItem
               icon={
@@ -242,7 +269,6 @@ export default function DashboardPage() {
             />
           </nav>
 
-          {/* Bottom Actions */}
           <div className="space-y-2 pt-4 border-t border-white/5">
             {!sidebarCollapsed && (
               <p className="text-xs text-gray-500 px-4 mb-2">
@@ -287,7 +313,7 @@ export default function DashboardPage() {
             <Button
               variant="ghost"
               className="w-full justify-start gap-3 text-gray-400 hover:text-white hover:bg-white/5 mt-4"
-              onClick={() => window.open('https://puls.bio/share', '_blank')}
+              onClick={() => window.open(`${process.env.NEXT_PUBLIC_APP_URL}/share`, '_blank')}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -300,18 +326,28 @@ export default function DashboardPage() {
               {!sidebarCollapsed && 'Share Profile'}
             </Button>
 
-            {/* User info */}
             {!sidebarCollapsed && (
-              <div className="pt-4 border-t border-white/5">
+              <div className="pt-4 border-t border-white/5 relative">
                 <div className="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-white/5 cursor-pointer">
-                  <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center font-bold shrink-0">
-                    {stats.username[0].toUpperCase()}
-                  </div>
+                  {userData?.avatarUrl ? (
+                    <img
+                      src={userData.avatarUrl}
+                      alt={stats.username}
+                      className="w-10 h-10 rounded-full object-cover shrink-0"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center font-bold shrink-0">
+                      {stats.username[0].toUpperCase()}
+                    </div>
+                  )}
                   <div className="flex-1 min-w-0">
                     <p className="font-medium truncate">{stats.username}</p>
                     <p className="text-xs text-gray-500 truncate">UID {stats.uid}</p>
                   </div>
-                  <button className="text-gray-500 hover:text-white">
+                  <button 
+                    onClick={() => setShowUserMenu(!showUserMenu)}
+                    className="text-gray-500 hover:text-white"
+                  >
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path
                         strokeLinecap="round"
@@ -322,20 +358,68 @@ export default function DashboardPage() {
                     </svg>
                   </button>
                 </div>
+
+                {showUserMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="absolute bottom-full left-0 right-0 mb-2 bg-[#1a1a24] border border-white/10 rounded-lg shadow-xl overflow-hidden"
+                  >
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        router.push('/account/settings');
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-gray-300 hover:bg-white/5 hover:text-white transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"
+                        />
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
+                        />
+                      </svg>
+                      Settings
+                    </button>
+                    <div className="h-px bg-white/10" />
+                    <button
+                      onClick={() => {
+                        setShowUserMenu(false);
+                        handleLogout();
+                      }}
+                      className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"
+                        />
+                      </svg>
+                      Logout
+                    </button>
+                  </motion.div>
+                )}
               </div>
             )}
           </div>
         </div>
       </motion.aside>
 
-      {/* Main Content */}
       <main
         className={`flex-1 relative transition-all duration-300 ${
           sidebarCollapsed ? 'ml-20' : 'ml-64'
         }`}
       >
         <div className="p-8 max-w-7xl mx-auto">
-          {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -347,9 +431,7 @@ export default function DashboardPage() {
             )}
           </motion.div>
 
-          {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-            {/* Username Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -379,7 +461,6 @@ export default function DashboardPage() {
               </Card>
             </motion.div>
 
-            {/* Alias Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -409,7 +490,6 @@ export default function DashboardPage() {
               </Card>
             </motion.div>
 
-            {/* UID Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -439,7 +519,6 @@ export default function DashboardPage() {
               </Card>
             </motion.div>
 
-            {/* Profile Views Card */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -476,9 +555,7 @@ export default function DashboardPage() {
             </motion.div>
           </div>
 
-          {/* Account Statistics & Manage Account */}
           <div className="grid lg:grid-cols-3 gap-6 mb-8">
-            {/* Profile Completion - Takes 2 columns */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -488,7 +565,6 @@ export default function DashboardPage() {
               <Card className="bg-[#1a1a24]/80 backdrop-blur-xl border-white/10 p-6">
                 <h2 className="text-xl font-bold mb-6">Account Statistics</h2>
 
-                {/* Profile Completion */}
                 <div className="mb-6">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="text-sm font-medium">Profile Completion</h3>
@@ -504,7 +580,6 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Warning */}
                 <div className="bg-orange-500/10 border border-orange-500/20 rounded-xl p-4 mb-6 flex items-start gap-3">
                   <svg
                     className="w-5 h-5 text-orange-500 shrink-0 mt-0.5"
@@ -529,7 +604,6 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                {/* Tasks */}
                 <div className="grid grid-cols-2 gap-3">
                   {stats.completedTasks.map((task, index) => (
                     <motion.button
@@ -569,7 +643,6 @@ export default function DashboardPage() {
               </Card>
             </motion.div>
 
-            {/* Manage Account - Takes 1 column */}
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -616,21 +689,6 @@ export default function DashboardPage() {
 
                   <Button
                     variant="outline"
-                    className="w-full justify-start gap-3 border-white/10 bg-white/5 hover:bg-white/10 hover:border-yellow-500/30"
-                  >
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"
-                      />
-                    </svg>
-                    Want more? Unlock with Premium
-                  </Button>
-
-                  <Button
-                    variant="outline"
                     className="w-full justify-start gap-3 border-white/10 bg-white/5 hover:bg-white/10 hover:border-purple-500/30"
                     onClick={() => router.push('/account/settings')}
                   >
@@ -652,7 +710,6 @@ export default function DashboardPage() {
                   </Button>
                 </div>
 
-                {/* Connections */}
                 <div className="mt-6 pt-6 border-t border-white/10">
                   <h3 className="text-sm font-medium mb-3">Connections</h3>
                   <p className="text-xs text-gray-400 mb-4">
@@ -672,7 +729,6 @@ export default function DashboardPage() {
             </motion.div>
           </div>
 
-          {/* Account Analytics - Placeholder */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -689,25 +745,84 @@ export default function DashboardPage() {
                 </Button>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
-                {/* Placeholder charts */}
-                <div>
-                  <p className="text-sm text-gray-400 mb-4">
-                    Visitor Devices in the last 7 days
-                  </p>
+              {loadingAnalytics ? (
+                <div className="grid md:grid-cols-2 gap-6">
                   <div className="h-48 bg-white/5 rounded-xl flex items-center justify-center">
-                    <p className="text-gray-500">Chart placeholder</p>
+                    <p className="text-gray-500">Loading chart...</p>
+                  </div>
+                  <div className="h-48 bg-white/5 rounded-xl flex items-center justify-center">
+                    <p className="text-gray-500">Loading chart...</p>
                   </div>
                 </div>
-                <div>
-                  <p className="text-sm text-gray-400 mb-4">
-                    Profile Views in the last 7 days
-                  </p>
-                  <div className="h-48 bg-white/5 rounded-xl flex items-center justify-center">
-                    <p className="text-gray-500">Chart placeholder</p>
+              ) : analyticsData ? (
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div>
+                    <p className="text-sm text-gray-400 mb-4">
+                      Profile Views in the last 7 days
+                    </p>
+                    <div className="h-48 bg-white/5 rounded-xl p-4">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={analyticsData.profileViews || []}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                          <XAxis dataKey="day" stroke="#999" />
+                          <YAxis stroke="#999" />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: '#1a1a24',
+                              border: '1px solid #ffffff10',
+                              borderRadius: '8px',
+                            }}
+                            formatter={(value) => [value, 'Views']}
+                            labelStyle={{ color: '#fff' }}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="views"
+                            stroke="#a855f7"
+                            strokeWidth={2}
+                            dot={{ fill: '#a855f7', r: 4 }}
+                            activeDot={{ r: 6 }}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-sm text-gray-400 mb-4">
+                      Visitor Devices in the last 7 days
+                    </p>
+                    <div className="h-48 bg-white/5 rounded-xl p-4">
+                      <ResponsiveContainer width="100%" height="100%">
+                        <BarChart data={analyticsData.deviceTypes || []}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
+                          <XAxis dataKey="device" stroke="#999" />
+                          <YAxis stroke="#999" />
+                          <Tooltip
+                            contentStyle={{
+                              backgroundColor: '#1a1a24',
+                              border: '1px solid #ffffff10',
+                              borderRadius: '8px',
+                            }}
+                            formatter={(value) => [value, 'Count']}
+                            labelStyle={{ color: '#fff' }}
+                          />
+                          <Bar dataKey="count" fill="#3b82f6" radius={[8, 8, 0, 0]} />
+                        </BarChart>
+                      </ResponsiveContainer>
+                    </div>
                   </div>
                 </div>
-              </div>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-6">
+                  <div className="h-48 bg-white/5 rounded-xl flex items-center justify-center">
+                    <p className="text-gray-500">No data available yet</p>
+                  </div>
+                  <div className="h-48 bg-white/5 rounded-xl flex items-center justify-center">
+                    <p className="text-gray-500">No data available yet</p>
+                  </div>
+                </div>
+              )}
             </Card>
           </motion.div>
         </div>
@@ -716,7 +831,6 @@ export default function DashboardPage() {
   );
 }
 
-// NavItem Component
 function NavItem({
   icon,
   label,
@@ -777,7 +891,6 @@ function NavItem({
         )}
       </button>
 
-      {/* Sub items */}
       {!collapsed && expanded && subItems.length > 0 && (
         <div className="ml-12 mt-2 space-y-1">
           {subItems.map((item, index) => (
