@@ -7,7 +7,7 @@ datasource db {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            Int    @id @default(autoincrement())
   email         String?   @unique
   emailVerified DateTime?
   password      String?
@@ -38,7 +38,7 @@ model User {
 model EmailVerificationToken {
   id        String   @id @default(cuid())
   token     String   @unique
-  userId    String   @unique
+  userId    Int   @unique
   expiresAt DateTime
   createdAt DateTime @default(now())
 
@@ -47,7 +47,7 @@ model EmailVerificationToken {
 
 model Account {
   id                String  @id @default(cuid())
-  userId            String
+  userId            Int
   type              String
   provider          String
   providerAccountId String
@@ -66,7 +66,7 @@ model Account {
 model Session {
   id           String   @id @default(cuid())
   sessionToken String   @unique
-  userId       String
+  userId       Int
   expires      DateTime
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -83,7 +83,7 @@ model VerificationToken {
 
 model Page {
   id        String   @id @default(cuid())
-  userId    String   @unique
+  userId    Int   @unique
   published Boolean  @default(true)
 
   layout    Json?    @default("{}")
@@ -99,7 +99,7 @@ model Page {
 
 model Link {
   id        String  @id @default(cuid())
-  userId    String
+  userId    Int
   title     String
   url       String
   icon      String?  
@@ -114,7 +114,7 @@ model Link {
 
 model Connection {
   id        String  @id @default(cuid())
-  userId    String
+  userId    Int
   provider  String  
   username  String?
   avatarUrl String?
