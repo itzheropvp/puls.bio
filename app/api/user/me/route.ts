@@ -19,6 +19,7 @@ export async function GET() {
         email: true,
         bio: true,
         avatarUrl: true,
+        avatarDecorationUrl: true,
         createdAt: true,
         page: {
           select: {
@@ -48,6 +49,37 @@ export async function GET() {
     return NextResponse.json(user);
   } catch (error) {
     console.error('Error fetching user data:', error);
+    return NextResponse.json(
+      { error: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function PATCH(request: Request) {
+  try {
+    const session = await getServerSession(authOptions);
+
+    if (!session?.user?.email) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json().catch(() => ({}));
+    const avatarDecorationUrlRaw = body?.avatarDecorationUrl;
+    const avatarDecorationUrl =
+      typeof avatarDecorationUrlRaw === 'string' && avatarDecorationUrlRaw.trim().length > 0
+        ? avatarDecorationUrlRaw.trim()
+        : null;
+
+    const user = await prisma.user.update({
+      where: { email: session.user.email },
+      data: { avatarDecorationUrl },
+      select: { avatarDecorationUrl: true },
+    });
+
+    return NextResponse.json(user);
+  } catch (error) {
+    console.error('Error updating user data:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }

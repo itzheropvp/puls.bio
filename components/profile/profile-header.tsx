@@ -13,6 +13,7 @@ interface Connection {
 interface User {
   username: string | null;
   avatarUrl?: string | null;
+  avatarDecorationUrl?: string | null;
   bio?: string | null;
   connections: Connection[];
 }
@@ -25,26 +26,39 @@ interface ProfileHeaderProps {
 
 export default function ProfileHeader({ user, views, linksCount }: ProfileHeaderProps) {
   const discordConnection = user.connections.find(c => c.provider === 'discord');
-
+  console.log(user);
   return (
     <div className="text-center mb-8">
-      {/* Avatar with gradient border */}
       <div className="relative inline-block mb-6">
         {user.avatarUrl ? (
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-red-500 via-pink-500 to-purple-500 rounded-full blur-md opacity-75" />
             <img
               src={user.avatarUrl}
               alt={user.username ?? 'User avatar'}
               className="w-32 h-32 rounded-full relative z-10 border-4 border-black"
             />
+            {user.avatarDecorationUrl && (
+              <img
+                src={user.avatarDecorationUrl}
+                alt=""
+                className="absolute inset-0 w-32 h-32 z-20 pointer-events-none select-none"
+                aria-hidden="true"
+              />
+            )}
           </div>
         ) : (
           <div className="relative">
-            <div className="absolute inset-0 bg-gradient-to-br from-red-500 via-pink-500 to-purple-500 rounded-full blur-md opacity-75" />
             <div className="w-32 h-32 bg-gradient-to-br from-red-500 to-purple-500 rounded-full relative z-10 border-4 border-black flex items-center justify-center text-5xl font-bold">
               {user.username?.[0].toUpperCase() || 'U'}
             </div>
+            {user.avatarDecorationUrl && (
+              <img
+                src={user.avatarDecorationUrl}
+                alt=""
+                className="absolute inset-0 w-32 h-32 z-20 pointer-events-none select-none"
+                aria-hidden="true"
+              />
+            )}
           </div>
         )}
       </div>

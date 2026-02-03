@@ -4,9 +4,11 @@ import NotFoundClaimPage from '@/components/profile/not-found-claim';
 import LoggedInBanner from '@/components/profile/logged-in-banner';
 import ProfileHeader from '@/components/profile/profile-header';
 import LinksList from '@/components/profile/links-list';
+import ProfileAudio from '@/components/profile/profile-audio';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { headers } from 'next/headers';
+import type { CSSProperties } from 'react';
 
 interface PageProps {
   params: Promise<{
@@ -42,13 +44,42 @@ export default async function UserProfilePage({ params }: PageProps) {
     referer: headersList.get('referer') || undefined,
   }).catch(console.error);
 
+  const themeData =
+    typeof user.theme === 'object' && user.theme !== null && !Array.isArray(user.theme)
+      ? (user.theme as Record<string, unknown>)
+      : {};
+
+  const musicData =
+    typeof user.music === 'object' && user.music !== null && !Array.isArray(user.music)
+      ? (user.music as Record<string, unknown>)
+      : {};
+
+  const theme = {
+    background: '#000000',
+    text: '#ffffff',
+    accent: '#a855f7',
+    ...(themeData || {}),
+  } as {
+    background: string;
+    text: string;
+    accent: string;
+  };
+
+  const musicUrl = typeof musicData.url === 'string' ? musicData.url.trim() : '';
+  const musicEnabled = Boolean(musicData.enabled) && musicUrl.length > 0;
+  const musicTitle = typeof musicData.title === 'string' ? musicData.title : 'Unknown title';
+  const musicArtist = typeof musicData.artist === 'string' ? musicData.artist : '';
+  const musicAutoplay =
+    typeof musicData.autoplay === 'boolean' ? musicData.autoplay : true;
+
+  const pageStyle: CSSProperties = {
+    backgroundColor: theme.background,
+    color: theme.text,
+    ['--accent' as keyof CSSProperties]: theme.accent,
+  };
+
   return (
-    <div className="min-h-screen bg-black text-white relative">
-      <div className="fixed top-6 left-6 z-50">
-        <svg className="w-6 h-6 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
-        </svg>
-      </div>
+    <div className="min-h-screen bg-black text-white relative" style={pageStyle}>
 
       {session?.user && (
         <LoggedInBanner username={(session.user as any).username} />
@@ -60,6 +91,14 @@ export default async function UserProfilePage({ params }: PageProps) {
           views={user.page?.views || 0}
           linksCount={user.links.length}
         />
+        {musicEnabled && (
+          <ProfileAudio
+            url={musicUrl}
+            title={musicTitle}
+            artist={musicArtist}
+            autoplay={musicAutoplay}
+          />
+        )}
         <LinksList links={user.links} />
       </div>
     </div>

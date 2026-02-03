@@ -12,12 +12,12 @@ model User {
   emailVerified DateTime?
   password      String?
   username      String?   @unique
-  image         String?
+  alias         String?   @unique
 
   bio           String?
   avatarUrl     String?
-  avatarEffects Json?     
-  music         Json?     
+  avatarDecorationUrl String?   
+  music         Json?        
   theme         Json?
 
   page          Page?
