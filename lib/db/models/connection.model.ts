@@ -10,14 +10,14 @@ export class ConnectionModel {
     return prisma.connection.upsert({
       where: {
         userId_provider: {
-          userId,
+          userId: parseInt(userId),
           provider: data.provider,
         },
       },
       update: data,
       create: {
         ...data,
-        userId,
+        userId: parseInt(userId),
       },
     })
   }
@@ -30,7 +30,7 @@ export class ConnectionModel {
     return prisma.connection.update({
       where: {
         userId_provider: {
-          userId,
+          userId: parseInt(userId),
           provider,
         },
       },

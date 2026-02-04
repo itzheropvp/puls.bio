@@ -7,13 +7,13 @@ export class LinkModel {
     icon?: string
   }) {
     const count = await prisma.link.count({
-      where: { userId },
+      where: { userId: parseInt(userId) },
     })
 
     return prisma.link.create({
       data: {
         ...data,
-        userId,
+        userId: parseInt(userId),
         order: count,
       },
     })

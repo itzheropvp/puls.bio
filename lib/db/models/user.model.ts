@@ -43,10 +43,17 @@ export class UserModel {
   }
 
   static async incrementViews(id: number) {
-    return prisma.user.update({
+    const user = await prisma.user.findUnique({
       where: { id },
+      include: { page: true },
+    });
+
+    if (!user || !user.page) return null;
+
+    return prisma.page.update({
+      where: { id: user.page.id },
       data: {
-        totalViews: { increment: 1 },
+        views: { increment: 1 },
       },
     })
   }
