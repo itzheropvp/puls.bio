@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useEffect, useMemo, useState } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 type UserMeResponse = {
@@ -199,11 +200,22 @@ export default function DashboardPage() {
       >
         <div className="flex flex-col h-full p-4">
           <div className="flex items-center gap-3 mb-8 px-2">
-            <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center font-bold text-xl shrink-0">
-              P
-            </div>
-            {!sidebarCollapsed && (
-              <span className="text-xl font-bold">puls.pw</span>
+            {sidebarCollapsed ? (
+              <Image
+                src="/logo.png"
+                alt="puls.pw logo"
+                width={40}
+                height={40}
+                className="rounded-lg shrink-0"
+              />
+            ) : (
+              <Image
+                src="/logo_all_white.png"
+                alt="puls.pw logo"
+                width={100}
+                height={32}
+                className="h-auto"
+              />
             )}
           </div>
 

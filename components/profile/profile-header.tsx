@@ -26,7 +26,6 @@ interface ProfileHeaderProps {
 
 export default function ProfileHeader({ user, views, linksCount }: ProfileHeaderProps) {
   const discordConnection = user.connections.find(c => c.provider === 'discord');
-  console.log(user);
   return (
     <div className="text-center mb-8">
       <div className="relative inline-block mb-6">

@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Home() {
   const [username, setUsername] = useState('');
@@ -28,7 +29,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] text-white overflow-x-hidden">
-      {/* Animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div
           className="absolute -top-1/2 -left-1/2 w-full h-full bg-gradient-to-br from-purple-600/10 via-transparent to-transparent rounded-full blur-3xl"
@@ -56,7 +56,6 @@ export default function Home() {
         />
       </div>
 
-      {/* Navbar */}
       <motion.nav
         className="fixed top-0 w-full z-50 backdrop-blur-xl bg-[#0a0a0f]/80 border-b border-white/5"
         initial={{ y: -100 }}
@@ -69,14 +68,14 @@ export default function Home() {
             whileHover={{ scale: 1.05 }}
             transition={{ type: 'spring', stiffness: 400 }}
           >
-            <img
-              src="/logo.png"
-              alt="puls.bio logo"
-              className="w-10 h-10 rounded-xl"
+            <Image
+              src="/logo_all_white.png"
+              alt="puls.pw logo"
+              width={130}
+              height={45}
+              className="h-auto"
+              priority
             />
-            <span className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-              puls.bio
-            </span>
           </motion.div>
 
           <div className="hidden md:flex items-center gap-8">
@@ -104,7 +103,6 @@ export default function Home() {
         </div>
       </motion.nav>
 
-      {/* Hero Section */}
       <section className="relative pt-32 pb-20 px-6">
         <div className="max-w-6xl mx-auto text-center">
           <motion.div
@@ -260,10 +258,13 @@ export default function Home() {
           <div className="grid md:grid-cols-5 gap-8 mb-12">
             <div className="md:col-span-2">
               <div className="flex items-center gap-3 mb-4">
-                <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center font-bold text-xl">
-                  P
-                </div>
-                <span className="text-2xl font-bold">puls.pw</span>
+                <Image
+                  src="/logo_all_white.png"
+                  alt="puls.pw logo"
+                  width={120}
+                  height={35}
+                  className="h-auto"
+                />
               </div>
               <p className="text-gray-400 mb-4">
                 Create feature-rich, customizable and modern link-in-bio pages with puls.pw.

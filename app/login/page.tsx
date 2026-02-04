@@ -9,6 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Card } from '@/components/ui/card';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -75,7 +76,6 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div
           className="absolute top-1/4 -left-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl"
@@ -112,19 +112,21 @@ export default function LoginPage() {
         className="w-full max-w-md relative z-10"
       >
         <Card className="bg-[#1a1a1f]/95 backdrop-blur-xl border-white/10 p-8 shadow-2xl">
-          {/* Logo */}
           <motion.div
-            className="flex justify-center mb-8"
+            className="flex justify-center mb-3"
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
-            <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/25">
-              <span className="text-3xl font-bold text-white">P</span>
-            </div>
+            <Image
+              src="/logo_all_white.png"
+              alt="puls.pw logo"
+              width={120}
+              height={40}
+              className="h-auto"
+            />
           </motion.div>
 
-          {/* Title */}
           <motion.h1
             className="text-2xl font-bold text-white text-center mb-8"
             initial={{ opacity: 0 }}
