@@ -55,7 +55,7 @@ export async function GET() {
       dayMap.set(days[i], 0);
     }
 
-    analytics.forEach((record) => {
+    analytics.forEach((record: any) => {
       const date = new Date(record.createdAt);
       const dayIndex = date.getDay();
       const dayName = days[(dayIndex + 6) % 7];
