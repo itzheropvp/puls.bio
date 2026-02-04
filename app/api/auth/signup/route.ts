@@ -4,11 +4,20 @@ import crypto from "crypto";
 import { prisma } from "@/lib/db";
 import { Resend } from "resend";
 import { generateVerificationEmailHTML } from "@/lib/email";
+import { featureFlags } from "@/lib/config";
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 export async function POST(req: Request) {
   try {
+    // Check if registrations are enabled
+    if (!featureFlags.registrationEnabled) {
+      return NextResponse.json(
+        { message: "Registrations are currently disabled" },
+        { status: 403 }
+      );
+    }
+
     const { email, password, username } = await req.json();
 
     if (!email || !password || !username) {

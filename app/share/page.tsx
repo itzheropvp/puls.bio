@@ -51,7 +51,7 @@ export default function SharedPage() {
     };
 
     const shareOnTwitter = () => {
-        const text = `Check out my profile on puls.bio!`;
+        const text = `Check out my profile on puls.pw!`;
         const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(profileUrl)}`;
         window.open(url, "_blank");
     };
@@ -67,7 +67,7 @@ export default function SharedPage() {
     };
 
     const shareViaEmail = () => {
-        const subject = "Check out my puls.bio profile";
+        const subject = "Check out my puls.pw profile";
         const body = `Hey! Check out my profile: ${profileUrl}`;
         window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     };
@@ -118,7 +118,7 @@ export default function SharedPage() {
                             <Share2 className="w-12 h-12 mx-auto text-purple-400" />
                         </motion.div>
                         <h1 className="text-3xl font-bold text-white">Share Your Profile</h1>
-                        <p className="text-gray-400">Share your puls.bio profile with the world</p>
+                        <p className="text-gray-400">Share your puls.pw profile with the world</p>
                     </div>
 
                     {/* QR Code */}

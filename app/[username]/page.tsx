@@ -9,11 +9,30 @@ import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { headers } from 'next/headers';
 import type { CSSProperties } from 'react';
+import { Metadata } from 'next';
 
 interface PageProps {
   params: Promise<{
     username: string;
   }>;
+}
+
+export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
+  const { username } = await params;
+  const user = await prisma.user.findUnique({
+    where: { username },
+  });
+
+  if (!user) {
+    return {
+      title: 'User Not Found - puls.pw',
+    };
+  }
+
+  return {
+    title: `@${user.username} - puls.pw`,
+    description: user.bio || `Check out ${user.username}'s profile on puls.pw`,
+  };
 }
 
 export default async function UserProfilePage({ params }: PageProps) {
@@ -69,13 +88,27 @@ export default async function UserProfilePage({ params }: PageProps) {
   const musicEnabled = Boolean(musicData.enabled) && musicUrl.length > 0;
   const musicTitle = typeof musicData.title === 'string' ? musicData.title : 'Unknown title';
   const musicArtist = typeof musicData.artist === 'string' ? musicData.artist : '';
-  const musicAutoplay =
-    typeof musicData.autoplay === 'boolean' ? musicData.autoplay : true;
+  const musicAutoplay = typeof musicData.autoplay === 'boolean' ? musicData.autoplay : true;
+
+  const isBackgroundUrl =
+    typeof theme.background === 'string' &&
+    (theme.background.startsWith('http://') ||
+      theme.background.startsWith('https://') ||
+      theme.background.startsWith('data:'));
 
   const pageStyle: CSSProperties = {
-    backgroundColor: theme.background,
     color: theme.text,
     ['--accent' as keyof CSSProperties]: theme.accent,
+    ...(isBackgroundUrl
+      ? {
+          backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${theme.background})`,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          backgroundAttachment: 'fixed',
+        }
+      : {
+          backgroundColor: theme.background,
+        }),
   };
 
   return (

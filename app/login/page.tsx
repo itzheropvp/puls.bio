@@ -324,7 +324,7 @@ export default function LoginPage() {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7 }}
           >
-            Are you new to puls.bio?{' '}
+            Are you new to puls.pw?{' '}
             <Link
               href="/register"
               className="text-purple-400 hover:text-purple-300 font-medium transition-colors"

@@ -8,6 +8,7 @@ import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toast } from 'sonner';
 import Link from 'next/link';
+import { featureFlags } from '@/lib/config';
 
 export default function SignupPage() {
   const [email, setEmail] = useState('');
@@ -34,8 +35,12 @@ export default function SignupPage() {
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    // Validation
+
+    if (!featureFlags.registrationEnabled) {
+      toast.error('Registrations are currently disabled');
+      return;
+    }
+
     if (!email || !password || !username) {
       toast.error('Please fill in all fields');
       return;
@@ -108,7 +113,6 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0f] flex items-center justify-center p-6 relative overflow-hidden">
-      {/* Animated background elements */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none">
         <motion.div
           className="absolute top-1/4 -left-1/4 w-96 h-96 bg-purple-600/20 rounded-full blur-3xl"
@@ -145,7 +149,6 @@ export default function SignupPage() {
         className="w-full max-w-md relative z-10"
       >
         <Card className="bg-[#1a1a1f]/95 backdrop-blur-xl border-white/10 p-8 shadow-2xl">
-          {/* Logo */}
           <motion.div
             className="flex justify-center mb-8"
             initial={{ scale: 0.8, opacity: 0 }}
@@ -157,17 +160,27 @@ export default function SignupPage() {
             </div>
           </motion.div>
 
-          {/* Title */}
           <motion.h1
             className="text-2xl font-bold text-white text-center mb-8"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            Create a puls.bio account
+            Create a puls.pw account
           </motion.h1>
 
-          {/* Signup Form */}
+          {!featureFlags.registrationEnabled && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="bg-yellow-500/10 border border-yellow-500/50 rounded-lg p-4 mb-6"
+            >
+              <p className="text-yellow-400 text-sm">
+                📝 Registrations are currently disabled. We're in testing mode. Please check back soon!
+              </p>
+            </motion.div>
+          )}
+
           <motion.form
             onSubmit={handleSignup}
             initial={{ opacity: 0 }}
@@ -175,7 +188,6 @@ export default function SignupPage() {
             transition={{ delay: 0.4 }}
             className="space-y-5"
           >
-            {/* Email Input */}
             <div>
               <label htmlFor="email" className="block text-sm font-medium text-gray-200 mb-2">
                 Email
@@ -203,6 +215,7 @@ export default function SignupPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   className="pl-12 bg-black/40 border-white/10 h-12 rounded-xl text-white placeholder:text-gray-500 focus:border-purple-500/50 transition-colors"
+                  disabled={!featureFlags.registrationEnabled}
                   required
                 />
               </div>
@@ -236,6 +249,7 @@ export default function SignupPage() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="pl-12 pr-12 bg-black/40 border-white/10 h-12 rounded-xl text-white placeholder:text-gray-500 focus:border-purple-500/50 transition-colors"
+                  disabled={!featureFlags.registrationEnabled}
                   required
                 />
                 <button
@@ -272,7 +286,6 @@ export default function SignupPage() {
               </div>
             </div>
 
-            {/* Username Input */}
             <div>
               <label htmlFor="username" className="block text-sm font-medium text-gray-200 mb-2">
                 Username
@@ -294,7 +307,7 @@ export default function SignupPage() {
                   </svg>
                 </div>
                 <span className="absolute left-12 top-1/2 -translate-y-1/2 text-gray-500 text-sm">
-                  puls.bio/
+                  puls.pw/
                 </span>
                 <Input
                   id="username"
@@ -303,12 +316,12 @@ export default function SignupPage() {
                   value={username}
                   onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ''))}
                   className="pl-[7.5rem] bg-black/40 border-white/10 h-12 rounded-xl text-white placeholder:text-gray-500 focus:border-purple-500/50 transition-colors"
+                  disabled={!featureFlags.registrationEnabled}
                   required
                 />
               </div>
             </div>
 
-            {/* Terms Checkbox */}
             <div className="flex items-start gap-3 pt-2">
               <Checkbox
                 id="terms"
@@ -331,10 +344,9 @@ export default function SignupPage() {
               </label>
             </div>
 
-            {/* Signup Button */}
             <Button
               type="submit"
-              disabled={isLoading}
+              disabled={isLoading || !featureFlags.registrationEnabled}
               className="w-full bg-white/5 hover:bg-white/10 text-white py-6 rounded-xl border border-white/10 text-base font-medium transition-all duration-200 mt-6 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isLoading ? (
@@ -367,7 +379,6 @@ export default function SignupPage() {
             </Button>
           </motion.form>
 
-          {/* Login Link */}
           <motion.p
             className="text-center text-sm text-gray-400 mt-6"
             initial={{ opacity: 0 }}
@@ -384,7 +395,6 @@ export default function SignupPage() {
           </motion.p>
         </Card>
 
-        {/* Back to home link */}
         <motion.div
           className="text-center mt-6"
           initial={{ opacity: 0 }}

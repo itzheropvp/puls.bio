@@ -129,7 +129,7 @@ export default function Home() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            puls.bio is your go-to for modern, feature-rich link-in-bio pages and lightning-fast,
+            puls.pw is your go-to for modern, feature-rich link-in-bio pages and lightning-fast,
             customizable short links. Join over 850,000 creators growing their online presence with us.
           </motion.p>
 
@@ -182,7 +182,7 @@ export default function Home() {
               <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
                 850,000
               </span>{' '}
-              people use puls.bio
+              people use puls.pw
             </h2>
             <p className="text-xl text-gray-400">What are you waiting for?</p>
           </motion.div>
@@ -226,13 +226,13 @@ export default function Home() {
                 Everything you want, right here.
               </h2>
               <p className="text-xl text-gray-400 mb-8">
-                Join over 850,000+ people using puls.bio and become part of our large community.
+                Join over 850,000+ people using puls.pw and become part of our large community.
               </p>
 
               <div className="flex flex-col sm:flex-row items-center justify-center gap-4 max-w-md mx-auto">
                 <div className="relative flex-1 w-full">
                   <span className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500">
-                    puls.bio/
+                    puls.pw/
                   </span>
                   <Input
                     type="text"
@@ -263,10 +263,10 @@ export default function Home() {
                 <div className="w-10 h-10 bg-gradient-to-br from-purple-500 to-blue-500 rounded-xl flex items-center justify-center font-bold text-xl">
                   P
                 </div>
-                <span className="text-2xl font-bold">puls.bio</span>
+                <span className="text-2xl font-bold">puls.pw</span>
               </div>
               <p className="text-gray-400 mb-4">
-                Create feature-rich, customizable and modern link-in-bio pages with puls.bio.
+                Create feature-rich, customizable and modern link-in-bio pages with puls.pw.
               </p>
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
@@ -345,7 +345,7 @@ export default function Home() {
 
           <div className="pt-8 border-t border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
             <p className="text-gray-500 text-sm">
-              Copyright © 2026 puls.bio - All Rights Reserved.
+              Copyright © 2026 puls.pw - All Rights Reserved.
             </p>
             <div className="flex gap-4">
               <a

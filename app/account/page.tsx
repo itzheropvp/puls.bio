@@ -42,6 +42,12 @@ export default function DashboardPage() {
   const [loadingAnalytics, setLoadingAnalytics] = useState(false);
 
   useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.push('/login');
+    }
+  }, [status, router]);
+
+  useEffect(() => {
     let isMounted = true;
 
     const loadUserData = async () => {
@@ -142,7 +148,6 @@ export default function DashboardPage() {
   }
 
   if (!session) {
-    router.push('/login');
     return null;
   }
 
@@ -198,7 +203,7 @@ export default function DashboardPage() {
               P
             </div>
             {!sidebarCollapsed && (
-              <span className="text-xl font-bold">puls.bio</span>
+              <span className="text-xl font-bold">puls.pw</span>
             )}
           </div>
 
@@ -278,7 +283,7 @@ export default function DashboardPage() {
             <Button
               variant="ghost"
               className="w-full justify-start gap-3 text-gray-400 hover:text-white hover:bg-white/5"
-              onClick={() => window.open('https://help.puls.bio', '_blank')}
+              onClick={() => window.open('https://help.puls.pw', '_blank')}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -297,7 +302,7 @@ export default function DashboardPage() {
             <Button
               variant="ghost"
               className="w-full justify-start gap-3 text-purple-400 hover:text-purple-300 hover:bg-purple-500/10"
-              onClick={() => window.open(`https://puls.bio/${stats.username}`, '_blank')}
+              onClick={() => window.open(`https://puls.pw/${stats.username}`, '_blank')}
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path
@@ -713,7 +718,7 @@ export default function DashboardPage() {
                 <div className="mt-6 pt-6 border-t border-white/10">
                   <h3 className="text-sm font-medium mb-3">Connections</h3>
                   <p className="text-xs text-gray-400 mb-4">
-                    Link your Discord account to puls.bio
+                    Link your Discord account to puls.pw
                   </p>
                   <Button
                     className="w-full bg-[#5865F2] hover:bg-[#4752C4] text-white"
