@@ -252,7 +252,6 @@ export default function Home() {
         </motion.div>
       </section>
 
-      {/* Footer */}
       <footer className="border-t border-white/5 py-12 px-6 mt-20">
         <div className="max-w-7xl mx-auto">
           <div className="grid md:grid-cols-5 gap-8 mb-12">
