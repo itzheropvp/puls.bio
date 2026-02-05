@@ -21,6 +21,7 @@ export async function GET() {
         avatarUrl: true,
         avatarDecorationUrl: true,
         createdAt: true,
+        alias: true,
         page: {
           select: {
             views: true,
@@ -46,7 +47,20 @@ export async function GET() {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    return NextResponse.json(user);
+    const totalUsers = await prisma.user.count();
+    const usersBeforeThisUser = await prisma.user.count({
+      where: {
+        createdAt: {
+          lt: user.createdAt,
+        },
+      },
+    });
+    const percentile = Math.round(((usersBeforeThisUser + 1) / totalUsers) * 100);
+
+    return NextResponse.json({
+      ...user,
+      percentile,
+    });
   } catch (error) {
     console.error('Error fetching user data:', error);
     return NextResponse.json(
@@ -71,10 +85,22 @@ export async function PATCH(request: Request) {
         ? avatarDecorationUrlRaw.trim()
         : null;
 
+    // Handle bio updates
+    const bioRaw = body?.bio;
+    const bio =
+      typeof bioRaw === 'string' && bioRaw.trim().length > 0 && bioRaw.length <= 160
+        ? bioRaw.trim()
+        : bioRaw === '' ? null : undefined;
+
+    const updateData: any = { avatarDecorationUrl };
+    if (bio !== undefined) {
+      updateData.bio = bio;
+    }
+
     const user = await prisma.user.update({
       where: { email: session.user.email },
-      data: { avatarDecorationUrl },
-      select: { avatarDecorationUrl: true },
+      data: updateData,
+      select: { avatarDecorationUrl: true, bio: true },
     });
 
     return NextResponse.json(user);

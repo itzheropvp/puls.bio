@@ -18,6 +18,7 @@ type UserMeResponse = {
   bio: string | null;
   avatarUrl: string | null;
   createdAt: string;
+  percentile?: number;
   page: {
     views: number;
   } | null;
@@ -30,7 +31,8 @@ type UserMeResponse = {
     id: string;
     provider: string;
   }>;
-};
+  alias?: string | null;
+}
 
 export default function DashboardPage() {
   const { data: session, status } = useSession();
@@ -112,28 +114,34 @@ export default function DashboardPage() {
     const hasBio = Boolean(userData?.bio && userData.bio.trim().length > 0);
     const hasDiscord = userData?.connections?.some((c) => c.provider === 'discord') || false;
     const hasSocials = (userData?.links?.filter((l) => l.visible).length || 0) > 0;
+    const currentAlias = userData?.alias || 'Unavailable';
 
     const completedTasks = [
       { id: 1, label: 'Upload An Avatar', completed: hasAvatar },
       { id: 2, label: 'Add A Description', completed: hasBio },
       { id: 3, label: 'Link Discord Account', completed: hasDiscord },
       { id: 4, label: 'Add Socials', completed: hasSocials },
-      { id: 5, label: 'Enable 2FA', completed: false },
     ];
 
     const completedCount = completedTasks.filter((task) => task.completed).length;
     const profileCompletion = Math.round((completedCount / completedTasks.length) * 100);
 
     const pageViews = userData?.page?.views ?? 0;
+    const percentile = userData?.percentile ?? 0;
+    const percentileMessage = percentile === 0 
+      ? 'Calculating...' 
+      : `Joined in the ${percentile}th percentile`;
 
     return {
       username,
-      alias: 'Unavailable',
+      alias: currentAlias,
       uid: userData?.id || '—',
       profileViews: pageViews,
       viewsChange: `${pageViews} total views`,
       profileCompletion,
       completedTasks,
+      percentile,
+      percentileMessage,
     };
   }, [userData, session?.user]);
 
@@ -250,7 +258,7 @@ export default function DashboardPage() {
               }
               label="Customize"
               collapsed={sidebarCollapsed}
-              onClick={() => router.push('/customize')}
+              onClick={() => router.push('/account/customize')}
             />
 
             <NavItem
@@ -266,7 +274,7 @@ export default function DashboardPage() {
               }
               label="Links"
               collapsed={sidebarCollapsed}
-              onClick={() => router.push('/links')}
+              onClick={() => router.push('/account/links')}
             />
 
             <NavItem
@@ -282,7 +290,7 @@ export default function DashboardPage() {
               }
               label="Templates"
               collapsed={sidebarCollapsed}
-              onClick={() => router.push('/templates')}
+              onClick={() => router.push('/account/templates')}
             />
           </nav>
 
@@ -503,7 +511,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <p className="text-2xl font-bold mb-2">{stats.alias}</p>
-                <p className="text-xs text-gray-500">Premium Only</p>
+                <p className="text-xs text-purple-400">Change available now</p>
               </Card>
             </motion.div>
 
@@ -532,7 +540,7 @@ export default function DashboardPage() {
                   </div>
                 </div>
                 <p className="text-2xl font-bold mb-2">{stats.uid}</p>
-                <p className="text-xs text-gray-500">Joined after 99% of all users</p>
+                <p className="text-xs text-gray-500">{stats.percentileMessage}</p>
               </Card>
             </motion.div>
 
