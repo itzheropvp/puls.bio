@@ -19,6 +19,7 @@ model User {
   avatarDecorationUrl String?   
   music         Json?        
   theme         Json?
+  badges        String[]     @default([])
 
   page          Page?
   links         Link[]
